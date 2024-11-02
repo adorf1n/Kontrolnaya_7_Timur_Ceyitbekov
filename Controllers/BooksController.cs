@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 public class BooksController : Controller
 {
@@ -14,27 +15,25 @@ public class BooksController : Controller
     {
         Console.WriteLine($"Запрос на страницу Index, страница: {page}");
 
-        int pageSize = 6; 
+        int pageSize = 6;
+        var totalBooks = _context.Books.Count();
+        Console.WriteLine($"Общее количество книг: {totalBooks}");
 
         var books = _context.Books
             .FromSqlRaw(@"
-            SELECT id, author, coverphoto, dateadded, description, title, year
+            SELECT id, author, coverphoto, dateadded, description, title, year, ""UserId"", isborrowed
             FROM ""books""
             ORDER BY dateadded DESC
         ")
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToList();
 
-        int totalBooks = books.Count; 
-
-        Console.WriteLine($"Общее количество книг: {totalBooks}"); 
-
-        var pagedBooks = books.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-        Console.WriteLine($"Количество книг на странице: {pagedBooks.Count}");
+        Console.WriteLine($"Количество книг на странице: {books.Count}");
 
         var model = new BookViewModel
         {
-            Books = pagedBooks,
+            Books = books,
             TotalBooks = totalBooks,
             PageSize = pageSize,
             CurrentPage = page
@@ -43,24 +42,24 @@ public class BooksController : Controller
         return View(model);
     }
 
+
     public IActionResult Details(int id)
     {
-        Console.WriteLine($"Запрос на страницу деталей книги с id: {id}");
-
         var book = _context.Books
-            .FromSqlRaw("SELECT id, author, coverphoto, dateadded, description, title, year FROM \"books\" WHERE id = {0} LIMIT 1", id)
-            .AsEnumerable()
+            .FromSqlRaw(@"
+            SELECT id, author, coverphoto, dateadded, description, title, year, ""UserId"", isborrowed
+            FROM ""books""
+            WHERE id = @id", new NpgsqlParameter("id", id))
             .FirstOrDefault();
 
         if (book == null)
         {
-            Console.WriteLine($"Книга с id {id} не найдена.");
             return NotFound();
         }
 
-        Console.WriteLine($"Книга найдена: {book.title}, автор: {book.author}");
         return View(book);
     }
+
 
 
 
@@ -138,25 +137,47 @@ public class BooksController : Controller
     }
 
     [HttpPost]
-    public IActionResult Borrow(int id)
+    public IActionResult BorrowBook(int bookId, string email)
     {
-        // Здесь вы можете добавить логику для получения книги,
-        // например, обновление статуса книги или записи о том, кто её взял.
+        var user = _context.Users.FirstOrDefault(u => u.Email == email);
+        if (user == null)
+        {
+            Console.WriteLine($"Пользователь с email {email} не найден.");
+            ModelState.AddModelError("", "Пользователь с таким email не найден.");
+            return RedirectToAction("Index");
+        }
 
-        var book = _context.Books.Find(id);
+        var borrowedBooksCount = _context.Books.Count(b => b.UserId == user.Id && b.isborrowed);
+        if (borrowedBooksCount >= 3)
+        {
+            Console.WriteLine($"Пользователь {user.Email} уже взял максимальное количество книг.");
+            ModelState.AddModelError("", "Вы не можете взять более 3 книг.");
+            return RedirectToAction("Index");
+        }
+
+        var book = _context.Books.Find(bookId);
         if (book == null)
         {
-            Console.WriteLine($"Книга с id {id} не найдена.");
+            Console.WriteLine($"Книга с id {bookId} не найдена.");
             return NotFound();
         }
 
-        // Пример логики, когда книга была взята:
-        // book.Status = "Выдана"; // если у вас есть поле для статуса
-        // _context.SaveChanges(); // сохраните изменения в базе данных
+        if (book.isborrowed)
+        {
+            Console.WriteLine($"Книга {book.title} уже взята.");
+            ModelState.AddModelError("", "Эта книга уже взята.");
+            return RedirectToAction("Index");
+        }
 
-        Console.WriteLine($"Книга {book.title} была успешно получена.");
-        return RedirectToAction("Index"); // Перенаправляем обратно на главную страницу
+        book.isborrowed = true;
+        book.UserId = user.Id; 
+        _context.SaveChanges();
+
+        Console.WriteLine($"Книга {book.title} успешно выдана пользователю {user.Email}.");
+        return RedirectToAction("Index");
     }
+
+
 
 
     private bool BookExists(int id)

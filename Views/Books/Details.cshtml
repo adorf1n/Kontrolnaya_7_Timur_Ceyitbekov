@@ -12,9 +12,7 @@
             <p>@Model.description</p>
         </div>
     </div>
-    <form method="post" asp-action="Borrow" asp-route-id="@Model.id">
-        <button type="submit" class="borrow-button">Получить книгу</button>
-    </form>
+  
     <a href="@Url.Action("Index")" class="back-link">Вернуться к списку книг</a>
 </div>
 

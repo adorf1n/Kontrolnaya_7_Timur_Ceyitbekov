@@ -13,9 +13,12 @@
             <p>Год выпуска: @book.year</p>
             <p>Описание: @book.description</p>
             <p>Дата добавления: @book.dateadded.ToShortDateString()</p>
-            <form method="post" asp-action="Borrow" asp-route-id="@book.id">
-                <button type="submit" class="borrow-button">Получить книгу</button>
+            <form method="post" asp-action="BorrowBook">
+                <input type="hidden" name="bookId" value="@book.id" />
+                <input type="email" name="email" placeholder="Введите ваш email" required />
+                <button type="submit">Получить книгу</button>
             </form>
+            <p>@(book.isborrowed ? "Эта книга уже взята." : "Доступна для получения.")</p>
             <a class="details-link" asp-action="Details" asp-route-id="@book.id">Подробнее</a>
         </div>
     }

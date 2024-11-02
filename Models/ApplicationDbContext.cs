@@ -9,6 +9,16 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<Book> Books { get; set; }
+    public DbSet<User> Users { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Book>()
+            .ToTable("books")
+            .HasOne(b => b.User)
+            .WithMany(u => u.Books)
+            .HasForeignKey(b => b.UserId); 
+    }
 
     public bool CanConnect()
     {
