@@ -1,0 +1,39 @@
+﻿@model BookViewModel
+<div>
+    <p>Текущая страница: @Model.CurrentPage</p>
+    <p>Общее количество книг: @Model.TotalBooks</p>
+</div>
+<div class="book-list">
+    @foreach (var book in Model.Books)
+    {
+        <div class="book-card">
+            <h2>@book.title</h2>
+            <p>Автор: @book.author</p>
+            <img src="@book.coverphoto" alt="Обложка книги" class="book-cover" />
+            <p>Год выпуска: @book.year</p>
+            <p>Описание: @book.description</p>
+            <p>Дата добавления: @book.dateadded.ToShortDateString()</p>
+            <form method="post" asp-action="Borrow" asp-route-id="@book.id">
+                <button type="submit" class="borrow-button">Получить книгу</button>
+            </form>
+            <a class="details-link" asp-action="Details" asp-route-id="@book.id">Подробнее</a>
+        </div>
+    }
+</div>
+
+<div class="pagination">
+    @if (Model.CurrentPage > 1) 
+    {
+        <a href="@Url.Action("Index", new { page = Model.CurrentPage - 1 })" class="btn btn-secondary">Назад</a>
+    }
+
+    @for (int i = 1; i <= Math.Ceiling((double)Model.TotalBooks / Model.PageSize); i++)
+    {
+        <a href="@Url.Action("Index", new { page = i })" class="btn @(i == Model.CurrentPage ? "btn-primary" : "btn-light")">@i</a>
+    }
+
+    @if (Model.CurrentPage < Math.Ceiling((double)Model.TotalBooks / Model.PageSize)) 
+    {
+        <a href="@Url.Action("Index", new { page = Model.CurrentPage + 1 })" class="btn btn-secondary">Вперед</a>
+    }
+</div>

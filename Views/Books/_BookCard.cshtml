@@ -1,0 +1,10 @@
+﻿@model Book
+
+<div class="book-card">
+    <img src="@Model.coverphoto" alt="Cover of @Model.title" />
+    <h3>@Model.title</h3>
+    <p>Author: @Model.author</p>
+    <p>Status: Available</p>
+    <a asp-action="Details" asp-route-id="@Model.id" class="btn btn-info">Подробнее</a>
+    <button class="btn btn-primary">Получить</button>
+</div>

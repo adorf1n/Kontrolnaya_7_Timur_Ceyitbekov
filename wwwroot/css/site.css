@@ -20,3 +20,64 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.book-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; 
+    margin: 20px 0;
+}
+
+.book-card {
+    border: 1px solid #ccc; 
+    border-radius: 8px; 
+    padding: 15px; 
+    margin-bottom: 20px; 
+    width: calc(33.333% - 20px); 
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); 
+    transition: transform 0.2s; 
+}
+
+    .book-card:hover {
+        transform: scale(1.03); 
+    }
+
+.book-cover {
+    max-width: 100%; 
+    border-radius: 4px; 
+}
+
+.borrow-button {
+    background-color: #28a745;
+    color: white;
+    border: none; 
+    padding: 10px 15px; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    transition: background-color 0.3s; 
+}
+
+    .borrow-button:hover {
+        background-color: #218838; 
+    }
+
+.details-link {
+    display: inline-block;
+    margin-top: 10px; 
+    color: #007bff;
+    text-decoration: none; 
+}
+
+    .details-link:hover {
+        text-decoration: underline; 
+    }
+
+.pagination {
+    margin-top: 20px; /
+}
+
+    .pagination a {
+        margin: 0 5px; 
+        text-decoration: none; 
+        color: #007bff;
+    }

@@ -1,0 +1,81 @@
+﻿@model Book
+
+<div class="book-details">
+    <h1 class="book-title">@Model.title</h1>
+    <div class="book-info">
+        <img src="@Model.coverphoto" alt="Обложка книги" class="book-cover" />
+        <div class="book-description">
+            <h2>Автор: @Model.author</h2>
+            <p><strong>Год выпуска:</strong> @Model.year</p>
+            <p><strong>Дата добавления:</strong> @Model.dateadded.ToShortDateString()</p>
+            <p><strong>Описание:</strong></p>
+            <p>@Model.description</p>
+        </div>
+    </div>
+    <form method="post" asp-action="Borrow" asp-route-id="@Model.id">
+        <button type="submit" class="borrow-button">Получить книгу</button>
+    </form>
+    <a href="@Url.Action("Index")" class="back-link">Вернуться к списку книг</a>
+</div>
+
+<style>
+    .book-details {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
+        background-color: #f9f9f9;
+    }
+
+    .book-title {
+        text-align: center;
+        color: #333;
+    }
+
+    .book-info {
+        display: flex;
+        margin-top: 20px;
+    }
+
+    .book-cover {
+        max-width: 200px;
+        margin-right: 20px;
+        border-radius: 10px;
+        box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .book-description {
+        flex-grow: 1;
+    }
+
+    .borrow-button {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .borrow-button:hover {
+        background-color: #0056b3;
+    }
+
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 15px;
+        text-decoration: none;
+        color: #007bff;
+        font-size: 16px;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>

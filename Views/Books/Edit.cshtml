@@ -1,0 +1,35 @@
+﻿@model Book
+
+<h2>Редактирование книги</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="id" />
+    <div>
+        <label asp-for="title"></label>
+        <input asp-for="title" />
+        <span asp-validation-for="title" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="author"></label>
+        <input asp-for="author" />
+        <span asp-validation-for="author" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="coverphoto"></label>
+        <input asp-for="coverphoto" />
+        <span asp-validation-for="coverphoto" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="year"></label>
+        <input asp-for="year" />
+        <span asp-validation-for="year" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="description"></label>
+        <textarea asp-for="description"></textarea>
+        <span asp-validation-for="description" class="text-danger"></span>
+    </div>
+    <button type="submit">Сохранить изменения</button>
+</form>
+
+<a href="@Url.Action("Index", "Books")" class="btn">Назад к списку</a>
