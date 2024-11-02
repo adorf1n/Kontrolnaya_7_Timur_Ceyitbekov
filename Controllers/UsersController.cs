@@ -1,13 +1,37 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 
 public class UsersController : Controller
 {
     private readonly UserManager<User> _userManager;
+    private readonly ApplicationDbContext _context;
 
-    public UsersController(UserManager<User> userManager)
+    public UsersController(UserManager<User> userManager, ApplicationDbContext context)
     {
         _userManager = userManager;
+        _context = context;
+    }
+
+    public async Task<IActionResult> Index()
+    {
+        Console.WriteLine("Запрос списка пользователей и количества их книг.");
+
+        var users = await _userManager.Users
+            .Select(user => new UserViewModel
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                BorrowedBooksCount = _context.Books.Count(b => b.UserId == user.Id && b.isborrowed)
+            })
+            .ToListAsync();
+
+        Console.WriteLine($"Найдено пользователей: {users.Count}");
+
+        return View(users);
     }
 
     public IActionResult Create()
@@ -23,9 +47,9 @@ public class UsersController : Controller
 
         if (ModelState.IsValid)
         {
-            user.UserName = user.Email; 
+            user.UserName = user.Email;
 
-            var result = await _userManager.CreateAsync(user, "Password123!"); 
+            var result = await _userManager.CreateAsync(user, "Password123!");
 
             if (result.Succeeded)
             {
@@ -55,4 +79,5 @@ public class UsersController : Controller
         return View(user);
     }
 
+    
 }

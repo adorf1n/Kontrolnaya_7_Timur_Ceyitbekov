@@ -70,7 +70,6 @@ public class BooksController : Controller
         var totalBooks = query.Count();
         Console.WriteLine($"Общее количество книг: {totalBooks}");
 
-        // Выполнение запроса
         var books = query
             .OrderByDescending(b => b.dateadded)
             .Skip((page - 1) * pageSize)
