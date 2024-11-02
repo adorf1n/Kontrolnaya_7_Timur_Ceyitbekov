@@ -11,20 +11,68 @@ public class BooksController : Controller
         _context = context;
     }
 
-    public IActionResult Index(int page = 1)
+    /* public IActionResult Index(int page = 1)
+     {
+         Console.WriteLine($"Запрос на страницу Index, страница: {page}");
+
+         int pageSize = 6;
+
+
+         var books = _context.Books
+             .FromSqlRaw(@"
+             SELECT id, author, coverphoto, dateadded, description, title, year, ""UserId"", isborrowed
+             FROM ""books""
+             ORDER BY dateadded DESC
+         ")
+             .Skip((page - 1) * pageSize)
+             .Take(pageSize)
+             .ToList();
+
+
+         var totalBooks = _context.Books.Count();
+         Console.WriteLine($"Общее количество книг: {totalBooks}");
+         Console.WriteLine($"Количество книг на странице: {books.Count}");
+
+         var model = new BookViewModel
+         {
+             Books = books,
+             TotalBooks = totalBooks,
+             PageSize = pageSize,
+             CurrentPage = page
+         };
+
+         return View(model);
+     }*/
+
+    public IActionResult Index(int page = 1, string title = "", string author = "", bool? isBorrowed = null)
     {
         Console.WriteLine($"Запрос на страницу Index, страница: {page}");
 
         int pageSize = 6;
-        var totalBooks = _context.Books.Count();
+        var query = _context.Books.AsQueryable();
+
+        // Применение фильтров
+        if (!string.IsNullOrEmpty(title))
+        {
+            query = query.Where(b => b.title.Contains(title));
+        }
+
+        if (!string.IsNullOrEmpty(author))
+        {
+            query = query.Where(b => b.author.Contains(author));
+        }
+
+        if (isBorrowed.HasValue)
+        {
+            query = query.Where(b => b.isborrowed == isBorrowed.Value);
+        }
+
+        var totalBooks = query.Count();
         Console.WriteLine($"Общее количество книг: {totalBooks}");
 
-        var books = _context.Books
-            .FromSqlRaw(@"
-            SELECT id, author, coverphoto, dateadded, description, title, year, ""UserId"", isborrowed
-            FROM ""books""
-            ORDER BY dateadded DESC
-        ")
+        // Выполнение запроса
+        var books = query
+            .OrderByDescending(b => b.dateadded)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToList();
@@ -36,11 +84,19 @@ public class BooksController : Controller
             Books = books,
             TotalBooks = totalBooks,
             PageSize = pageSize,
-            CurrentPage = page
+            CurrentPage = page,
+            Filter = new BookFilterModel
+            {
+                Title = title,
+                Author = author,
+                IsBorrowed = isBorrowed
+            }
         };
 
         return View(model);
     }
+
+
 
 
     public IActionResult Details(int id)

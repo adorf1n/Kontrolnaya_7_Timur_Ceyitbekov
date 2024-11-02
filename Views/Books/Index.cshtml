@@ -1,42 +1,38 @@
 ﻿@model BookViewModel
-<div>
-    <p>Текущая страница: @Model.CurrentPage</p>
-    <p>Общее количество книг: @Model.TotalBooks</p>
-</div>
-<div class="book-list">
+
+<h1>Список книг</h1>
+
+<form method="get">
+    <input type="text" name="title" placeholder="Название книги" value="@Model.Filter.Title" />
+    <input type="text" name="author" placeholder="Автор" value="@Model.Filter.Author" />
+    <select name="isBorrowed">
+        <option value="">Все</option>
+        <!option value="true" @(Model.Filter.IsBorrowed == true ? "selected" : "")>Выданные</!option>
+        <!option value="false" @(Model.Filter.IsBorrowed == false ? "selected" : "")>Доступные</!option>
+    </select>
+    <button type="submit">Фильтровать</button>
+</form>
+
+<div class="row">
     @foreach (var book in Model.Books)
     {
-        <div class="book-card">
-            <h2>@book.title</h2>
-            <p>Автор: @book.author</p>
-            <img src="@book.coverphoto" alt="Обложка книги" class="book-cover" />
-            <p>Год выпуска: @book.year</p>
-            <p>Описание: @book.description</p>
-            <p>Дата добавления: @book.dateadded.ToShortDateString()</p>
-            <form method="post" asp-action="BorrowBook">
-                <input type="hidden" name="bookId" value="@book.id" />
-                <input type="email" name="email" placeholder="Введите ваш email" required />
-                <button type="submit">Получить книгу</button>
-            </form>
-            <p>@(book.isborrowed ? "Эта книга уже взята." : "Доступна для получения.")</p>
-            <a class="details-link" asp-action="Details" asp-route-id="@book.id">Подробнее</a>
+        <div class="col-md-4">
+            <div class="card">
+                <img src="@book.coverphoto" class="card-img-top" alt="@book.title" />
+                <div class="card-body">
+                    <h5 class="card-title">@book.title</h5>
+                    <p class="card-text">Автор: @book.author</p>
+                    <p class="card-text">Статус: @(book.isborrowed ? "Выдана" : "Доступна")</p>
+                    <a href="@Url.Action("Details", new { id = book.id })" class="btn btn-primary">Подробнее</a>
+                </div>
+            </div>
         </div>
     }
 </div>
 
 <div class="pagination">
-    @if (Model.CurrentPage > 1) 
-    {
-        <a href="@Url.Action("Index", new { page = Model.CurrentPage - 1 })" class="btn btn-secondary">Назад</a>
-    }
-
     @for (int i = 1; i <= Math.Ceiling((double)Model.TotalBooks / Model.PageSize); i++)
     {
-        <a href="@Url.Action("Index", new { page = i })" class="btn @(i == Model.CurrentPage ? "btn-primary" : "btn-light")">@i</a>
-    }
-
-    @if (Model.CurrentPage < Math.Ceiling((double)Model.TotalBooks / Model.PageSize)) 
-    {
-        <a href="@Url.Action("Index", new { page = Model.CurrentPage + 1 })" class="btn btn-secondary">Вперед</a>
+        <a href="@Url.Action("Index", new { page = i, title = Model.Filter.Title, author = Model.Filter.Author, isBorrowed = Model.Filter.IsBorrowed })">@i</a>
     }
 </div>
